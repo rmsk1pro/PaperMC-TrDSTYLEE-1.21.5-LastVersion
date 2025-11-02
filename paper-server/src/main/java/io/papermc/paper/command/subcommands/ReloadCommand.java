@@ -21,13 +21,13 @@ public final class ReloadCommand implements PaperSubcommand {
     }
 
     private void doReload(final CommandSender sender) {
-        Command.broadcastCommandMessage(sender, text("Please note that this command is not supported and may cause issues.", RED));
-        Command.broadcastCommandMessage(sender, text("If you encounter any issues please use the /stop command to restart your server.", RED));
+        Command.broadcastCommandMessage(sender, text("Por favor, note que este comando não é suportado e pode causar problemas.", RED));
+        Command.broadcastCommandMessage(sender, text("Se você encontrar qualquer problema, use o comando /stop para reiniciar seu servidor.", RED));
 
         MinecraftServer server = ((CraftServer) sender.getServer()).getServer();
         server.paperConfigurations.reloadConfigs(server);
         server.server.reloadCount++;
 
-        Command.broadcastCommandMessage(sender, text("Paper config reload complete.", GREEN));
+        Command.broadcastCommandMessage(sender, text("Recarregamento da configuração do Paper completo.", GREEN));
     }
 }

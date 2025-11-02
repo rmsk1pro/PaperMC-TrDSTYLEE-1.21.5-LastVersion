@@ -53,6 +53,13 @@ public final class PluginRemapper {
     private static final Logger LOGGER = LogUtils.getClassLogger();
     static final String ICON_SUCCESS = "✅";
     static final String ICON_LOADING = "⏳";
+    static final String ICON_INFO = "ℹ️";
+
+    // Cores ANSI
+    private static final String ANSI_WHITE = "\u001B[37m";
+    private static final String COLOR_PRIMARY = ANSI_GREEN;
+    private static final String COLOR_SECONDARY = ANSI_WHITE;
+    private static boolean usePrimaryColor = true;
 
     private final ExecutorService threadPool;
     private final ReobfServer reobf;
@@ -105,6 +112,35 @@ public final class PluginRemapper {
         this.extraPlugins.write();
         this.unknownOrigin.write(clean);
         this.libraries.write(clean);
+    }
+
+    // Método auxiliar para alternar cores
+    private static String getNextColor() {
+        final String color = usePrimaryColor ? COLOR_PRIMARY : COLOR_SECONDARY;
+        usePrimaryColor = !usePrimaryColor;
+        return color;
+    }
+
+    // Método para formatar mensagens de processo com partes coloridas
+    private static String formatProcessMessage(String icon, String process, String fileName) {
+        String color = getNextColor();
+        return icon + " " + color + process + ANSI_RESET + " " + COLOR_SECONDARY + fileName + ANSI_RESET;
+    }
+
+    // Método para mensagens de conclusão
+    private static String formatCompletionMessage(String icon, String process, String fileName, long time) {
+        return icon + " " + COLOR_PRIMARY + process + " " + COLOR_SECONDARY + fileName +
+            COLOR_PRIMARY + " concluído em " + time + "ms." + ANSI_RESET;
+    }
+
+    // Método para mensagens de informação
+    private static String formatInfo(String icon, String message) {
+        return icon + " " + COLOR_SECONDARY + message + ANSI_RESET;
+    }
+
+    // Método para mensagens de sucesso
+    private static String formatSuccess(String icon, String message) {
+        return icon + " " + COLOR_PRIMARY + message + ANSI_RESET;
     }
 
     // Called on startup and reload
@@ -216,12 +252,12 @@ public final class PluginRemapper {
 
     private static IMappingFile reverse(final IMappingFile mappings) {
         if (DEBUG_LOGGING) {
-            LOGGER.info(ANSI_GREEN + ICON_LOADING + "  Revertendo mapeamentos..." + ANSI_RESET);
+            LOGGER.info(formatProcessMessage(ICON_LOADING, "Revertendo", "mapeamentos..."));
         }
         final long start = System.currentTimeMillis();
         final IMappingFile reversed = mappings.reverse();
         if (DEBUG_LOGGING) {
-            LOGGER.info(ICON_SUCCESS + " " + ANSI_GREEN + " Reversão de mapeamentos concluída em {}ms." + ANSI_RESET, System.currentTimeMillis() - start);
+            LOGGER.info(formatCompletionMessage(ICON_SUCCESS, "Reversão de", "mapeamentos", System.currentTimeMillis() - start));
         }
         return reversed;
     }
@@ -317,13 +353,13 @@ public final class PluginRemapper {
             if (library) {
                 if (mojangMappedManifest) {
                     if (DEBUG_LOGGING) {
-                        LOGGER.info("✅ " + ANSI_GREEN + "Biblioteca '{}' já está mapeada para Mojang." + ANSI_RESET, inputFile);
+                        LOGGER.info(formatSuccess(ICON_SUCCESS, "Biblioteca '" + inputFile.getFileName().toString() + "' já está mapeada para Mojang."));
                     }
                     index.skip(inputFile);
                     return CompletableFuture.completedFuture(inputFile);
                 } else if (ns == null) {
                     if (DEBUG_LOGGING) {
-                        LOGGER.info("ℹ️ " + ANSI_GREEN + "Biblioteca '{}' não especifica um namespace de mapeamento (não remapeando)." + ANSI_RESET, inputFile);
+                        LOGGER.info(formatInfo(ICON_INFO, "Biblioteca '" + inputFile.getFileName().toString() + "' não especifica um namespace de mapeamento (não remapeando)."));
                     }
                     index.skip(inputFile);
                     return CompletableFuture.completedFuture(inputFile);
@@ -331,13 +367,13 @@ public final class PluginRemapper {
             } else {
                 if (mojangMappedManifest) {
                     if (DEBUG_LOGGING) {
-                        LOGGER.info("✅ " + ANSI_GREEN + "Plugin '{}' já está mapeado para Mojang." + ANSI_RESET, inputFile);
+                        LOGGER.info(formatSuccess(ICON_SUCCESS, "Plugin '" + inputFile.getFileName().toString() + "' já está mapeado para Mojang."));
                     }
                     index.skip(inputFile);
                     return CompletableFuture.completedFuture(inputFile);
                 } else if (ns == null && Files.exists(fs.getPath(PluginFileType.PAPER_PLUGIN_YML))) {
                     if (DEBUG_LOGGING) {
-                        LOGGER.info("ℹ️ " + ANSI_GREEN + "Plugin '{}' é um plugin Paper sem namespace especificado." + ANSI_RESET, inputFile);
+                        LOGGER.info(formatInfo(ICON_INFO, "Plugin '" + inputFile.getFileName().toString() + "' é um plugin Paper sem namespace especificado."));
                     }
                     index.skip(inputFile);
                     return CompletableFuture.completedFuture(inputFile);
@@ -348,7 +384,10 @@ public final class PluginRemapper {
         }
 
         return this.reobf.remapped().thenApplyAsync(reobfServer -> {
-            LOGGER.info(ANSI_GREEN + ICON_LOADING + "  Remapeando {} '{}'..." + ANSI_RESET, library ? "biblioteca" : "plugin", inputFile);
+            // Mensagem de início do processo
+            LOGGER.info(formatProcessMessage(ICON_LOADING, "Remapeando",
+                (library ? "biblioteca '" : "plugin '") + inputFile.getFileName().toString() + "'..."));
+
             final long start = System.currentTimeMillis();
             try (final DebugLogger logger = DebugLogger.forOutputFile(destination)) {
                 try (final Renamer renamer = Renamer.builder()
@@ -365,7 +404,11 @@ public final class PluginRemapper {
             } catch (final Exception ex) {
                 throw new RuntimeException("Falha ao remapear o jar do plugin '" + inputFile + "'", ex);
             }
-            LOGGER.info(ICON_SUCCESS + " " + ANSI_GREEN + "Remapeamento de {} '{}' concluído em {}ms." + ANSI_RESET, library ? "biblioteca" : "plugin", inputFile, System.currentTimeMillis() - start);
+
+            // Mensagem de conclusão
+            LOGGER.info(formatCompletionMessage(ICON_SUCCESS, "Remapeamento de",
+                (library ? "biblioteca '" : "plugin '") + inputFile.getFileName().toString() + "'",
+                System.currentTimeMillis() - start));
             return destination;
         }, this.threadPool);
     }
@@ -389,12 +432,12 @@ public final class PluginRemapper {
     private static IMappingFile loadMappings(final String name, final InputStream stream) {
         try (stream) {
             if (DEBUG_LOGGING) {
-                LOGGER.info(ANSI_GREEN + ICON_LOADING + "  Carregando mapeamentos {}..." + ANSI_RESET, name);
+                LOGGER.info(formatProcessMessage(ICON_LOADING, "Carregando", "mapeamentos " + name + "..."));
             }
             final long start = System.currentTimeMillis();
             final IMappingFile load = IMappingFile.load(stream);
             if (DEBUG_LOGGING) {
-                LOGGER.info(ICON_SUCCESS + " " + ANSI_GREEN + "Carregamento de mapeamentos {} concluído em {}ms." + ANSI_RESET, name, System.currentTimeMillis() - start);
+                LOGGER.info(formatCompletionMessage(ICON_SUCCESS, "Carregamento de", "mapeamentos " + name, System.currentTimeMillis() - start));
             }
             return load;
         } catch (final IOException ex) {
@@ -424,7 +467,7 @@ public final class PluginRemapper {
             collector.throwIfPresent();
         } catch (final Exception ex) {
             // Não falhar durante o bootstrap/carregamento de plugins. O(s) plugin(s) em questão será(ão) ignorado(s)
-            LOGGER.error("❌ " + ANSI_GREEN + "Encontrada exceção ao remapear plugins" + ANSI_RESET, ex);
+            LOGGER.error("❌ " + COLOR_PRIMARY + "Encontrada exceção ao remapear plugins" + ANSI_RESET, ex);
         }
         return ret;
     }
