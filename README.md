@@ -1,100 +1,96 @@
-Paper [![Paper Build Status](https://img.shields.io/github/actions/workflow/status/PaperMC/Paper/build.yml?branch=main)](https://github.com/PaperMC/Paper/actions)
-[![Discord](https://img.shields.io/discord/289587909051416579.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/papermc)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/papermc?label=GitHub%20Sponsors)](https://github.com/sponsors/PaperMC)
-[![Open Collective](https://img.shields.io/opencollective/all/papermc?label=OpenCollective%20Sponsors)](https://opencollective.com/papermc)
-===========
 
-The most widely used, high-performance Minecraft server that aims to fix gameplay and mechanics inconsistencies.
+<img width="1630" height="930" alt="PaperTPS" src="https://github.com/user-attachments/assets/9aedc822-cbe8-4408-8509-8dd1cc8c07ac" />
+
+<img width="1636" height="898" alt="PaperEnderChest" src="https://github.com/user-attachments/assets/42c6eb1e-0a5c-43f9-8d44-4865e21ab184" />
+
+<img width="1220" height="368" alt="Pl" src="https://github.com/user-attachments/assets/acbf614d-7ce9-4b1d-b5c1-2d1680940edf" />
 
 
-**Support and Project Discussion:**
-- [Our forums](https://forums.papermc.io/) or [Discord](https://discord.gg/papermc)
 
-How To (Server Admins)
-------
-Paperclip is a jar file that you can download and run just like a normal jar file.
 
-Download Paper from our [downloads page](https://papermc.io/downloads/paper).
+# 🧩 PaperSpigot 1.21.5 – Edição Modificada por TrDSTYLEE
 
-Run the Paperclip jar directly from your server. Just like old times
+🚀 Uma versão especial do servidor Paper, otimizada e adaptada para servidores brasileiros!
 
-* Documentation on using Paper: [docs.papermc.io](https://docs.papermc.io)
-* For a sneak peek at upcoming features, [see here](https://github.com/PaperMC/Paper/projects)
+---
 
-How To (Plugin Developers)
-------
-* See our API [here](paper-api)
-* See upcoming, pending, and recently added API [here](https://github.com/orgs/PaperMC/projects/2/views/4)
-* Paper API javadocs here: [papermc.io/javadocs](https://papermc.io/javadocs/)
-#### Repository (for paper-api)
-##### Maven
+## ✨ Principais Atualizações
 
-```xml
-<repository>
-    <id>papermc</id>
-    <url>https://repo.papermc.io/repository/maven-public/</url>
-</repository>
-```
+### ✅ Algumas Traduções para PT-BR  
+🔤 Diversos comandos e mensagens do console/jogador traduzidos para o português brasileiro, melhorando a experiência nativa.
 
-```xml
-<dependency>
-    <groupId>io.papermc.paper</groupId>
-    <artifactId>paper-api</artifactId>
-    <version>1.21.5-R0.1-SNAPSHOT</version>
-    <scope>provided</scope>
-</dependency>
-```
-##### Gradle
-```kotlin
-repositories {
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
+### ✅ Comandos Modificados e Otimizados  
+🛠️ Alterações e melhorias em comandos como:  
+- `/pl`, `/ver`, `/version`, `/tps`, `/reload`  
+- Bloqueios, aliases personalizados e ajustes de segurança.
+
+### ✅ Comando TPS com Estilo  
+📊 O comando `/tps` foi reformulado para exibir os ticks com precisão e visual limpo e legível.
+
+### ✅ Melhorias de Desempenho  
+⚙️ Ajustes internos focados em estabilidade, consumo de memória e desempenho geral do servidor.
+
+### ✅ Verificação de Versão Desativada  
+🔒 Sem chamadas externas ao GitHub. Console limpo e livre de erros 403.
+
+### ✅ Console com Suporte ANSI e UTF-8  
+🌈 Exibição com cores reais, ícones visuais e codificação internacional ativada para total compatibilidade.
+
+---
+
+## 🔧 Informações Técnicas
+
+- **Base:** Paper 1.21.5 (última versão estável)
+- **Modificado por:** `TrDSTYLEE`
+- **Atualizado em:** Julho de 2025
+
+---
+
+## 💡 Ideal para
+
+✔️ Servidores PvP  
+✔️ Survival  
+✔️ Criativo  
+✔️ Arenas  
+✔️ Redes com sistema próprio e alta personalização
+
+---
+
+## 💬 Comunidade
+
+Foco em acessibilidade, desempenho e suporte para servidores brasileiros!  
+Sinta-se à vontade para usar, modificar e compartilhar.
+
+---
+
+
+### ✅ EnderChest Plus (54 slots)  
+📦 Clique com o botão direito em um **Ender Chest físico** e uma versão expandida será aberta:  
+- **Slots expandidos (54)** se a versão/modificação permitir  
+- Som de abertura e fechamento customizados  
+- Comando adicional: `/echestplus`
+
+```java
+@EventHandler
+public void onEnderChestOpen(PlayerInteractEvent event) {
+    if (event.getAction() == Action.RIGHT_CLICK_BLOCK &&
+        event.getClickedBlock() != null &&
+        event.getClickedBlock().getType() == Material.ENDER_CHEST) {
+
+        event.setCancelled(true); // Impede a abertura padrão
+
+        Player player = event.getPlayer();
+        Inventory realEnderChest = player.getEnderChest(); // Pode estar modificado para 54 slots
+
+        player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 1.0f, 1.0f);
+        player.openInventory(realEnderChest);
     }
 }
 
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
+@EventHandler
+public void onEnderChestClose(InventoryCloseEvent event) {
+    if (event.getInventory().equals(event.getPlayer().getEnderChest())) {
+        Player player = (Player) event.getPlayer();
+        player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_CLOSE, 1.0f, 1.0f);
+    }
 }
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
-```
-
-How To (Compiling Jar From Source)
-------
-To compile Paper, you need JDK 21 and an internet connection.
-
-Clone this repo, run `./gradlew applyPatches`, then `./gradlew createMojmapBundlerJar` from your terminal. You can find the compiled jar in the `paper-server/build/libs` directory.
-
-To get a full list of tasks, run `./gradlew tasks`.
-
-How To (Pull Request)
-------
-See [Contributing](CONTRIBUTING.md)
-
-Old Versions (1.21.3 and below)
-------
-For branches of versions 1.8-1.21.3, please see our [archive repository](https://github.com/PaperMC/Paper-archive).
-
-Support Us
-------
-First of all, thank you for considering helping out, we really appreciate that!
-
-PaperMC has various recurring expenses, mostly related to infrastructure. Paper uses [Open Collective](https://opencollective.com/) via the [Open Source Collective fiscal host](https://opencollective.com/opensource) to manage expenses. Open Collective allows us to be extremely transparent, so you can always see how your donations are used. You can read more about financially supporting PaperMC [on our website](https://papermc.io/sponsors).
-
-You can find our collective [here](https://opencollective.com/papermc), or you can donate via GitHub Sponsors [here](https://github.com/sponsors/PaperMC), which will also go towards the collective.
-
-Special Thanks To:
--------------
-
-[![YourKit-Logo](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/)
-
-[YourKit](https://www.yourkit.com/), makers of the outstanding java profiler, support open source projects of all kinds with their full featured [Java](https://www.yourkit.com/java/profiler) and [.NET](https://www.yourkit.com/.net/profiler) application profilers. We thank them for granting Paper an OSS license so that we can make our software the best it can be.
-
-[<img src="https://user-images.githubusercontent.com/21148213/121807008-8ffc6700-cc52-11eb-96a7-2f6f260f8fda.png" alt="" width="150">](https://www.jetbrains.com)
-
-[JetBrains](https://www.jetbrains.com/), creators of the IntelliJ IDEA, supports Paper with one of their [Open Source Licenses](https://www.jetbrains.com/opensource/). IntelliJ IDEA is the recommended IDE for working with Paper, and most of the Paper team uses it.
-
-All our sponsors!  
-[![Sponsor Image](https://raw.githubusercontent.com/PaperMC/papermc.io/data/sponsors.png)](https://papermc.io/sponsors)
